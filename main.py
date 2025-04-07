@@ -16,16 +16,17 @@ def telegram_webhook():
     data = request.get_json()
     if "message" in data:
         chat_id = data["message"]["chat"]["id"]
-        text = data["message"].get("text", "")
+        text = data["message"].get("text", "").strip()
 
         if text == "/start":
             subscribers.add(chat_id)
             send_message(chat_id, "💰 تم تسجيلك لاستلام أسعار الذهب مرتين يوميًا")
             send_menu(chat_id)
-        elif "السعر الآن" in text:
+        elif any(keyword in text for keyword in ["السعر الآن", "أرسل لي السعر الآن", "الذهب", "الذهب الآن"]):
             send_gold_price(chat_id)
         else:
-            send_message(chat_id, "🟨 أرسل لي السعر الآن لمعرفة سعر الذهب الحالي.")
+            send_message(chat_id, "🟨 اضغط الزر أو اكتب 'السعر الآن' لمعرفة سعر الذهب الحالي.")
+
     return "OK"
 
 def send_menu(chat_id):
@@ -53,20 +54,19 @@ def send_gold_price(chat_id):
         data = response.json()
         price_usd_24k = data.get("price_gram_24k", 0)
         price_usd_21k = data.get("price_gram_21k", 0)
-
         price_qar_24k = round(price_usd_24k * USD_TO_QAR, 2)
         price_qar_21k = round(price_usd_21k * USD_TO_QAR, 2)
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 
-        msg = (
-            "📈 أسعار الذهب:\n\n"
-            f"🔹 24K: {price_qar_24k} ريال قطري\n"
-            f"🔸 21K: {price_qar_21k} ريال قطري\n\n"
-            f"⏰ التاريخ: {now}"
-        )
+        msg = f"""📈 أسعار الذهب اليوم:
+
+🔹 عيار 24K: {price_qar_24k} ريال قطري
+🔸 عيار 21K: {price_qar_21k} ريال قطري
+
+⏰ التاريخ: {now}"""
         send_message(chat_id, msg)
     else:
-        send_message(chat_id, "❌ تعذر الحصول على السعر. الرجاء المحاولة لاحقًا.")
+        send_message(chat_id, "❌ تعذر الحصول على السعر. حاول لاحقًا.")
 
 def send_message(chat_id, text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
