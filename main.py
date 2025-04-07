@@ -53,15 +53,17 @@ def send_gold_price(chat_id):
         data = response.json()
         price_usd_24k = data.get("price_gram_24k", 0)
         price_usd_21k = data.get("price_gram_21k", 0)
+
         price_qar_24k = round(price_usd_24k * USD_TO_QAR, 2)
         price_qar_21k = round(price_usd_21k * USD_TO_QAR, 2)
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        msg = f"📈 أسعار الذهب:
 
-🔹 24K: {price_qar_24k} ريال قطري
-🔸 21K: {price_qar_21k} ريال قطري
-
-⏰ التاريخ: {now}"
+        msg = (
+            "📈 أسعار الذهب:\n\n"
+            f"🔹 24K: {price_qar_24k} ريال قطري\n"
+            f"🔸 21K: {price_qar_21k} ريال قطري\n\n"
+            f"⏰ التاريخ: {now}"
+        )
         send_message(chat_id, msg)
     else:
         send_message(chat_id, "❌ تعذر الحصول على السعر. الرجاء المحاولة لاحقًا.")
